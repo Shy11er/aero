@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +63,13 @@ public class AeroService {
         List<Request> requestsQueue = new ArrayList<>();
         List<Polosa> polosaList = airoport.getRunwayList();
 
+        int totalLength = 0, totalMeasurements = 0; // средняя очередь
+        int totalBusyPolosas = 0, totalPolosas = polosaList.size(); // средняя занятость полос
+        int totalDelay = 0, maxDelay = 0; // Средняя и макс задержка вылета
+        double averageDelay = 0;
+
+        otchet.setAmountRequest(requestRemove.size());
+
         while (requestRemove.size() > 0) {
             // заполнение очереди
             for (Request request : requestRemove) {
@@ -69,6 +77,9 @@ public class AeroService {
                     if (request instanceof Vzlet) {
                         LocalDateTime depart = ((Vzlet) request).getDeparture();
                         if (!currTime.isBefore(depart)) {
+                            int delay = (int) ChronoUnit.MINUTES.between(depart, currTime);
+                            totalDelay += delay;
+                            maxDelay = Math.max(maxDelay, delay);
                             requestsQueue.add(request);
                         }
                     }
@@ -80,6 +91,12 @@ public class AeroService {
                     }
                 }
             }
+
+            if (otchet.getMaxQueueSize() < requestsQueue.size()) {
+                otchet.setMaxQueueSize(requestsQueue.size());
+            }
+            totalLength += requestsQueue.size();
+            totalMeasurements++;
 
             // поиск реквеста для работы в полосе
             for (Polosa polosa : polosaList) {
@@ -116,10 +133,18 @@ public class AeroService {
 
                 // проверка заявки на занятость и дальнейшее удаление из списка
                 if (polosa.getIsBusy() && polosa.getRequest() != null) {
+                    totalBusyPolosas++;
+
                     Request req = polosa.getRequest();
                     LocalDateTime dep = req.getFinish();
 
                     if (currTime.compareTo(dep) >= 0) {
+                        if (req.getRequestType().equals(Request.RequestType.Vzlet)) {
+                            int delay = (int) ChronoUnit.MINUTES.between(((Vzlet)req).getDeparture(), req.getStart());
+                            totalDelay += delay;
+                            maxDelay = Math.max(maxDelay, delay);
+                        }
+
                         polosa.setIsBusy(false);
                         polosa.setRequest(null);
 
@@ -134,15 +159,22 @@ public class AeroService {
                     }
                 }
             }
-
+            int totalDelaysCount = requestsQueue.size(); // Количество заявок с задержкой
+            averageDelay = totalDelaysCount > 0 ? (double) totalDelay / totalDelaysCount : 0;
             System.out.println(requestsQueue.size());
             currTime = currTime.plusMinutes(2);
         }
 
+        otchet.setAverQueueSize((double) totalLength / totalMeasurements);
+        otchet.setAverPolosa((double) totalBusyPolosas / totalPolosas);
+        otchet.setMaxDelay(maxDelay);
+        otchet.setAverDelay(averageDelay);
+
         System.out.println("DONE");
     }
 
-    private void updateQueue() {
-
+    public Otchet get() {
+        System.out.println(otchet);
+        return otchet;
     }
 }
