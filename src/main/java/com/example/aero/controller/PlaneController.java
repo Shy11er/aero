@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin("http://localhost:5173")
 public class PlaneController {
     private final PlaneService planeService;
 
@@ -22,7 +21,7 @@ public class PlaneController {
        planeService.delete(id);
     }
 
-    @PatchMapping("/plane/update/{id}")
+    @PutMapping("/plane/update/{id}")
     public void update(@PathVariable("id") Long id, @RequestBody Plane plane) {
         planeService.update(plane, id);
     }

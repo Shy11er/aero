@@ -47,6 +47,7 @@ public class PolosaService {
                polosaRepository.save(vzletnaya);
                polosa = vzletnaya;
            }
+           polosaRepository.save(polosa);
            pol.add(polosa);
        }
 

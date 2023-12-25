@@ -27,6 +27,7 @@ public class SimulationService implements SimulationInterface {
 
 
     private boolean isRunning = false;
+    private int time;
     private long step;
     private long min_range;
     private long max_range;
@@ -123,6 +124,11 @@ public class SimulationService implements SimulationInterface {
         this.planeSpawn = simulationDto.getPlaneSpawn();
         LocalDateTime date = LocalDateTime.now();
         this.now = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), (int) simulationDto.getTime(), 0);
+        this.time = (int) simulationDto.getTime();
         this.finalNow = now.plusDays(1);
+    }
+
+    public int getTime() {
+        return time;
     }
 }

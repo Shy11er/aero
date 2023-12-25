@@ -3,10 +3,7 @@ package com.example.aero.controller;
 import com.example.aero.DTO.SimulationDto;
 import com.example.aero.service.SimulationService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -14,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SimulationController {
     private final SimulationService simulationService;
 
-    @GetMapping("/simulation/start")
+    @PostMapping("/simulation/start")
     public String startSimulation(@RequestBody SimulationDto simulationDto) {
         simulationService.init(simulationDto);
         return "Симуляция началась";

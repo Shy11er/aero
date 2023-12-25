@@ -29,14 +29,14 @@ public class RequestService {
         try {
             if ("Vzlet".equals(dto.getRequestType())) {
                 Vzlet vzlet = new Vzlet();
-                vzlet.setDeparture(LocalDateTime.now());
+                vzlet.setDeparture(dto.getDeparture());
                 vzlet.setRequestType(Request.RequestType.Vzlet);
 
                 requestRepository.save(vzlet);
                 request = vzlet;
             } else if ("Posadka".equals(dto.getRequestType())) {
                 Posadka posadka = new Posadka();
-                posadka.setArrival(LocalDateTime.now());
+                posadka.setArrival(dto.getArrival());
                 posadka.setRequestType(Request.RequestType.Posadka);
 
                 requestRepository.save(posadka);
@@ -49,6 +49,7 @@ public class RequestService {
         }
 
         request.setPlane(plane);
+        request.setStatus("Waiting");
         request.setTime_changed(dto.getTime_changed());
 
         requestRepository.save(request);
